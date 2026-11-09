@@ -1,299 +1,550 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>تطبيق ملئ الازايز</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>تحدي مَلي القزايز 💧</title>
+    <meta name="description" content="تطبيق عائلي لتحدي شرب الماء وملء القزايز">
+    <meta name="theme-color" content="#0284c7">
+    
+    <!-- PWA & iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مَلي القزايز">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 
-  <!-- ═══ وسوم PWA ═══ -->
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#C9A24B">
-  <meta name="color-scheme" content="dark">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="ملئ الأزايز">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --accent: #38bdf8;
+            --bg: #f0f9ff;
+            --text: #0f172a;
+            --glass: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
 
-  <!-- أيقونات التطبيق و PWA -->
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-  <link rel="apple-touch-icon" href="./icon-192.png">
-  <meta name="theme-color" content="#101826">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="./manifest.json">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text);
+            position: relative;
+        }
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      height: 100%; width: 100%; overflow: hidden;
-      background: #0B1018;
-      font-family: 'IBM Plex Sans Arabic', sans-serif;
-    }
+        /* Animated Bubbles */
+        .bubbles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
 
-    /* ═══ iframe الحامل للتطبيق ═══ */
-    #appFrame {
-      position: fixed; inset: 0;
-      width: 100%; height: 100%;
-      border: none; background: #101826;
-      opacity: 0; transition: opacity .6s ease;
-      z-index: 1;
-    }
-    #appFrame.show { opacity: 1; }
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(56,189,248,0.2));
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5), inset 0 0 10px rgba(255,255,255,0.5);
+            animation: rise linear infinite;
+        }
 
-    /* ═══ شاشة الإقلاع ═══ */
-    #splash {
-      position: fixed; inset: 0; z-index: 1000;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background:
-        radial-gradient(at 20% 0%, rgba(201,162,75,0.08) 0%, transparent 50%),
-        linear-gradient(135deg, #0B1018 0%, #101826 50%, #16202F 100%);
-      transition: opacity .8s ease, transform .8s ease;
-    }
-    #splash.hide {
-      opacity: 0; transform: scale(1.08); pointer-events: none;
-    }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+        }
 
-    .splash-logo {
-      width: 110px; height: 110px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 52px; color: #C9A24B;
-      background: rgba(201,162,75,0.08);
-      border: 2px solid rgba(201,162,75,0.25);
-      border-radius: 30px;
-      backdrop-filter: blur(12px);
-      margin-bottom: 26px;
-      animation: pulse 2.2s ease-in-out infinite;
-      box-shadow: 0 8px 32px rgba(201,162,75,0.15);
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-    }
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            padding-top: env(safe-area-inset-top, 20px);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
 
-    .splash-title {
-      color: #EDEFF3; font-size: 26px; font-weight: 700; margin-bottom: 8px;
-    }
-    .splash-sub {
-      color: #8B96A8; font-size: 14px; font-weight: 500; margin-bottom: 42px;
-    }
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(14, 165, 233, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset;
+            width: 100%;
+            max-width: 480px;
+            padding: 30px 25px;
+            text-align: center;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-    .splash-loader {
-      width: 220px; height: 5px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 10px; overflow: hidden;
-    }
-    .splash-loader span {
-      display: block; height: 100%; width: 0;
-      background: linear-gradient(90deg, #8E7333, #C9A24B, #D9B562);
-      border-radius: 10px;
-      animation: load 2.4s ease forwards;
-    }
-    @keyframes load {
-      0% { width: 0; } 50% { width: 70%; } 100% { width: 100%; }
-    }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    .splash-version {
-      position: absolute; bottom: 28px;
-      color: #5B6578; font-size: 12px; font-weight: 600;
-      font-family: 'JetBrains Mono', monospace;
-    }
+        .logo-wrapper {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 30px rgba(2, 132, 199, 0.4);
+            animation: float 4s ease-in-out infinite;
+            position: relative;
+        }
 
-    /* ═══ الأزرار العائمة ═══ */
-    .float-btn {
-      position: fixed; bottom: 22px; left: 50%;
-      transform: translateX(-50%);
-      z-index: 2000; display: none;
-      align-items: center; gap: 9px;
-      border: none; cursor: pointer;
-      padding: 14px 26px; border-radius: 50px;
-      font-family: inherit; font-size: 14px; font-weight: 700;
-      color: #fff; text-decoration: none;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
-      animation: slideUp .5s ease;
-    }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translate(-50%, 30px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
-    }
-    #installBanner {
-      background: linear-gradient(135deg, #C9A24B, #8E7333);
-      color: #0B1018;
-    }
-    #fallbackBtn {
-      background: linear-gradient(135deg, #C1543F, #A33E2E);
-    }
+        .logo-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 35px;
+            border: 2px dashed rgba(14, 165, 233, 0.4);
+            animation: spin 15s linear infinite;
+        }
 
-    /* ═══ دليل تثبيت آيفون ═══ */
-    #iosBanner {
-      position: fixed; bottom: 22px; left: 50%;
-      transform: translateX(-50%);
-      z-index: 2000; display: none; max-width: 92%;
-      background: rgba(11,16,24,0.96);
-      border: 1px solid rgba(201,162,75,0.3);
-      color: #EDEFF3; padding: 14px 18px;
-      border-radius: 16px;
-      font-size: 12.5px; font-weight: 600; line-height: 1.9;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
-    }
-    #iosBanner b { color: #C9A24B; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
 
-    /* ═══ مؤشر حالة الاتصال ═══ */
-    #connectionStatus {
-      position: fixed; top: 12px; left: 12px;
-      z-index: 3000; display: none;
-      align-items: center; gap: 6px;
-      padding: 6px 12px; border-radius: 20px;
-      font-size: 11px; font-weight: 700;
-      background: rgba(193,84,63,0.95);
-      color: #fff;
-      animation: slideDown .3s ease;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    #connectionStatus .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #fff; animation: blink 1.2s infinite;
-    }
-    @keyframes blink { 50% { opacity: 0.3; } }
-  </style>
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo-wrapper i {
+            font-size: 50px;
+            color: white;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 900;
+            color: #0c4a6e;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+        }
+
+        .subtitle {
+            color: #0369a1;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 20px;
+            font-size: 17px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-bottom: 12px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            box-shadow: 0 10px 20px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+            box-shadow: 0 5px 10px rgba(2, 132, 199, 0.2);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.7);
+            color: #0284c7;
+            border: 2px solid rgba(14, 165, 233, 0.2);
+        }
+
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(0.96);
+        }
+
+        /* iOS Instructions Accordion */
+        .ios-guide {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 0;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(14, 165, 233, 0.1);
+            text-align: right;
+        }
+
+        .ios-guide summary {
+            padding: 15px;
+            font-weight: 700;
+            color: #0c4a6e;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            list-style: none;
+        }
+
+        .ios-guide summary::-webkit-details-marker { display: none; }
+
+        .ios-guide summary i {
+            transition: transform 0.3s;
+        }
+
+        .ios-guide[open] summary i {
+            transform: rotate(180deg);
+        }
+
+        .ios-steps {
+            padding: 0 15px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            min-width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(2,132,199,0.2);
+        }
+
+        .step-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.6;
+            padding-top: 4px;
+        }
+
+        /* Offline Banner */
+        .offline-banner {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            z-index: 100;
+            transform: translateY(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .offline-banner.show {
+            transform: translateY(0);
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loader-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .water-loader {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid rgba(14, 165, 233, 0.2);
+            border-top-color: #0284c7;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loader-text {
+            font-weight: 800;
+            color: #0c4a6e;
+            font-size: 18px;
+        }
+        
+        /* Iframe Container */
+        #app-frame {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 50;
+            background: white;
+            display: none;
+        }
+        
+        #app-frame.active {
+            display: block;
+        }
+        
+        .frame-fallback {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.95);
+            z-index: 51;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .frame-fallback.active {
+            display: flex;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ═══ مؤشر عدم الاتصال ═══ -->
-  <div id="connectionStatus">
-    <span class="dot"></span>
-    لا يوجد اتصال بالإنترنت
-  </div>
+    <!-- Loader -->
+    <div class="loader-overlay" id="loader">
+        <div class="water-loader"></div>
+        <div class="loader-text">جاري تحضير القزايز... 💧</div>
+    </div>
 
-  <!-- ═══ شاشة الإقلاع ═══ -->
-  <div id="splash">
-    <div class="splash-logo">💧</div>
-    <div class="splash-title">تحدي ملئ الأزايز</div>
-    <div class="splash-sub">بسملة ـ حمزة ـ عزالدين</div>
-    <div class="splash-loader"><span></span></div>
-    <div class="splash-version">v2.0.0</div>
-  </div>
+    <!-- Offline Banner -->
+    <div class="offline-banner" id="offline-banner">
+        <i class="ri-wifi-off-line"></i> لا يوجد اتصال بالإنترنت
+    </div>
 
-  <!-- ═══ iframe التطبيق ═══ -->
-  <iframe id="appFrame"
-    src=""
-    allow="fullscreen; clipboard-write"
-    title="مركز إرسال الرسائل">
-  </iframe>
+    <!-- Iframe for the App -->
+    <iframe id="app-frame" src="about:blank"></iframe>
+    
+    <!-- Fallback if iframe fails -->
+    <div class="frame-fallback" id="frame-fallback">
+        <div class="logo-wrapper" style="animation:none; margin-bottom: 20px;">
+            <i class="ri-error-warning-line"></i>
+        </div>
+        <h2 style="color:#0c4a6e; margin-bottom:10px;">متصفح يمنع التضمين</h2>
+        <p style="color:#475569; margin-bottom:25px; max-width:300px;">لحماية أمنك، يمنع المتصفح تشغيل التطبيق داخل الصفحة. يرجى فتحه مباشرة.</p>
+        <a href="#" id="fallback-link" class="btn btn-primary" style="max-width:300px;">
+            <i class="ri-external-link-line"></i> فتح التطبيق مباشرة
+        </a>
+    </div>
 
-  <!-- ═══ الأزرار العائمة ═══ -->
-  <button id="installBanner" class="float-btn" onclick="installApp()">
-    📲 تثبيت التطبيق
-  </button>
-  <a id="fallbackBtn" class="float-btn" href="#" target="_blank" rel="noopener">
-    🔗 فتح التطبيق مباشرة
-  </a>
+    <!-- Main PWA Wrapper UI -->
+    <div class="container" id="main-ui">
+        <!-- Bubbles Background -->
+        <div class="bubbles" id="bubbles"></div>
 
-  <!-- ═══ دليل آيفون ═══ -->
-  <div id="iosBanner">
-    📲 <b>لتثبيت التطبيق على iPhone:</b><br>
-    1️⃣ اضغط زر المشاركة <b>⎋</b> أسفل Safari<br>
-    2️⃣ اختر «إضافة إلى شاشة البداية» <b>+</b><br>
-    3️⃣ اضغط «إضافة» — وسيفتح كتطبيق مستقل
-  </div>
+        <div class="glass-card">
+            <div class="logo-wrapper">
+                <i class="ri-glass-water-fill"></i>
+            </div>
+            <h1>تحدي مَلي القزايز</h1>
+            <p class="subtitle">بسملة ـ حمزة ـ عزالدين | v2.0.0</p>
 
-  <script src="./config.js"></script>
-  <script>
-    // ── تطبيق الإعدادات ──
-    var APP_URL = PWA_CONFIG.APP_URL;
-    document.getElementById('fallbackBtn').href = APP_URL;
+            <a href="#" id="open-app-btn" class="btn btn-primary">
+                <i class="ri-play-circle-line"></i>
+                تشغيل التطبيق
+            </a>
 
-    var frame = document.getElementById('appFrame');
-    var splash = document.getElementById('splash');
+            <a href="#" id="install-app-btn" class="btn btn-secondary">
+                <i class="ri-download-cloud-line"></i>
+                تثبيت التطبيق 📲
+            </a>
 
-    // التحقق من الرابط
-    if (APP_URL.indexOf('YOUR_DEPLOYMENT_ID') !== -1) {
-      splash.innerHTML =
-        '<div class="splash-logo">⚠️</div>' +
-        '<div class="splash-title">الإعداد غير مكتمل</div>' +
-        '<div class="splash-sub">عدّل APP_URL في ملف config.js</div>';
-    } else {
-      frame.src = APP_URL;
-    }
+            <details class="ios-guide">
+                <summary>
+                    <span><i class="ri-apple-fill" style="margin-left:8px;"></i> تثبيت التطبيق على iPhone</span>
+                    <i class="ri-arrow-down-s-line"></i>
+                </summary>
+                <div class="ios-steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-text">اضغط زر المشاركة <i class="ri-upload-2-line"></i> أسفل Safari</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-text">اختر «إضافة إلى شاشة البداية» <i class="ri-add-box-line"></i></div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div class="step-text">اضغط «إضافة» — وسيفتح كتطبيق مستقل 🚀</div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </div>
 
-    // ── إخفاء الإقلاع عند التحميل ──
-    frame.addEventListener('load', function () {
-      setTimeout(function () {
-        splash.classList.add('hide');
-        frame.classList.add('show');
-      }, PWA_CONFIG.SPLASH_DURATION);
-    });
-
-    // ── خطة الطوارئ ──
-    setTimeout(function () {
-      if (!splash.classList.contains('hide')) {
-        splash.style.opacity = '.35';
-        document.getElementById('fallbackBtn').style.display = 'flex';
-      }
-    }, PWA_CONFIG.LOAD_TIMEOUT);
-
-    // ── مؤشر حالة الاتصال ──
-    var statusEl = document.getElementById('connectionStatus');
-    function updateConnectionStatus() {
-      statusEl.style.display = navigator.onLine ? 'none' : 'flex';
-    }
-    window.addEventListener('online', updateConnectionStatus);
-    window.addEventListener('offline', updateConnectionStatus);
-    updateConnectionStatus();
-
-    // ── تثبيت PWA (أندرويد/كروم) ──
-    var deferredPrompt = null;
-    function isStandalone() {
-      return window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
-    }
-
-    window.addEventListener('beforeinstallprompt', function (e) {
-      e.preventDefault();
-      deferredPrompt = e;
-      setTimeout(function () {
-        if (!isStandalone()) {
-          document.getElementById('installBanner').style.display = 'flex';
+    <script src="config.js"></script>
+    <script>
+        // Generate Bubbles
+        const bubblesContainer = document.getElementById('bubbles');
+        for (let i = 0; i < 15; i++) {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            const size = Math.random() * 60 + 20;
+            b.style.width = `${size}px`;
+            b.style.height = `${size}px`;
+            b.style.left = `${Math.random() * 100}%`;
+            b.style.animationDuration = `${Math.random() * 10 + 8}s`;
+            b.style.animationDelay = `${Math.random() * 5}s`;
+            bubblesContainer.appendChild(b);
         }
-      }, PWA_CONFIG.INSTALL_PROMPT_DELAY);
-    });
 
-    function installApp() {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function (c) {
-        if (c.outcome === 'accepted') {
-          document.getElementById('installBanner').style.display = 'none';
+        const loader = document.getElementById('loader');
+        const mainUI = document.getElementById('main-ui');
+        const appFrame = document.getElementById('app-frame');
+        const frameFallback = document.getElementById('frame-fallback');
+        const offlineBanner = document.getElementById('offline-banner');
+        
+        // Use config
+        const APP_URL = PWA_CONFIG.APP_URL;
+        
+        document.getElementById('open-app-btn').href = APP_URL;
+        document.getElementById('fallback-link').href = APP_URL;
+
+        // Try loading in iframe
+        function launchApp() {
+            mainUI.style.display = 'none';
+            appFrame.classList.add('active');
+            appFrame.src = APP_URL;
         }
-        deferredPrompt = null;
-      });
-    }
 
-    // ── دليل آيفون ──
-    (function () {
-      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (isIOS && !isStandalone()) {
-        setTimeout(function () {
-          document.getElementById('iosBanner').style.display = 'block';
-        }, 2500);
-      }
-    })();
-
-    // ── Service Worker ──
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('./sw.js').catch(function (e) {
-          console.warn('SW:', e);
+        document.getElementById('open-app-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            launchApp();
         });
-      });
-    }
-  </script>
+
+        // Offline detection
+        function updateOnlineStatus() {
+            if (!navigator.onLine) {
+                offlineBanner.classList.add('show');
+            } else {
+                offlineBanner.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+
+        // Hide loader after splash duration
+        setTimeout(() => {
+            loader.classList.add('hidden');
+        }, PWA_CONFIG.SPLASH_DURATION);
+
+        // PWA Install Prompt (Android)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-app-btn').style.display = 'flex';
+        });
+
+        document.getElementById('install-app-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            } else {
+                // iOS or unsupported, show guide
+                document.querySelector('.ios-guide').setAttribute('open', '');
+                document.querySelector('.ios-guide').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Fallback button to return to menu
+        const backBtn = document.createElement('button');
+        backBtn.innerHTML = '<i class="ri-arrow-left-line"></i> رجوع';
+        backBtn.className = 'btn btn-secondary';
+        backBtn.style.cssText = 'position:fixed; top:20px; left:20px; width:auto; padding:10px 20px; z-index:100; display:none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+        backBtn.onclick = () => {
+            appFrame.classList.remove('active');
+            appFrame.src = 'about:blank';
+            frameFallback.classList.remove('active');
+            mainUI.style.display = 'flex';
+            backBtn.style.display = 'none';
+        };
+        document.body.appendChild(backBtn);
+
+        // Show back button when app is launched
+        const observer = new MutationObserver(() => {
+            if (appFrame.classList.contains('active')) {
+                backBtn.style.display = 'block';
+            } else {
+                backBtn.style.display = 'none';
+            }
+        });
+        observer.observe(appFrame, { attributes: true, attributeFilter: ['class'] });
+
+    </script>
 </body>
 </html>
